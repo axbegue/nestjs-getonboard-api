@@ -1,6 +1,6 @@
 import { Controller, Get, Post, Put, Delete, Param, Body } from '@nestjs/common';
 import { UserService } from './user.service';
-import { CreateUserDto, EditUserDto, UserRegistrationDto } from './dtos';
+import { CreateUserDto, EditUserDto, RegisterJobDto, UserRegistrationDto } from './dtos';
 import { Auth, User } from 'src/common/decorators';
 import { ApiTags } from '@nestjs/swagger';
 import { RolesBuilder, InjectRolesBuilder } from 'nest-access-control';
@@ -48,11 +48,11 @@ export class UserController {
     return { message: 'User created', data };
   }
 
-  // @Auth({
-  //   possession: 'own',
-  //   action: 'update',
-  //   resource: AppResource.USER,
-  // })
+  @Auth({
+    possession: 'own',
+    action: 'update',
+    resource: AppResource.USER,
+  })
   @Put(':id')
   async editOne(
     @Param('id') id: number,
@@ -61,14 +61,14 @@ export class UserController {
   ) {
     let data;
 
-    // if (this.rolesBuilder.can(user.roles).updateAny(AppResource.USER).granted) {
-    //   // esto es un admin
-    //   data = await this.userService.editOne(id, dto);
-    // } else {
+    if (this.rolesBuilder.can(user.roles).updateAny(AppResource.USER).granted) {
+      // esto es un admin
+      data = await this.userService.editOne(id, dto);
+    } else {
       // esto es un author
       const { roles, ...rest } = dto;
       data = await this.userService.editOne(id, rest, user);
-    // }
+    }
     return { message: 'User edited', data };
   }
 
@@ -89,5 +89,46 @@ export class UserController {
       data = await this.userService.deleteOne(id, user);
     }
     return { message: 'User deleted', data };
+  }
+
+  @Auth({
+    possession: 'own',
+    action: 'update',
+    resource: AppResource.USER,
+  })
+  @Put(':id/addjob')
+  async registerJob(
+    @Param('id') id: number,
+    @Body() dto: RegisterJobDto,
+    @User() user: UserEntity,
+  ) {
+    // console.log(id);
+    console.log(dto);
+    // console.log(user);
+    
+    let data;
+
+    if (this.rolesBuilder.can(user.roles).updateAny(AppResource.USER).granted) {
+      // esto es un admin
+      data = await this.userService.addJob(id, dto);
+    } else {
+      // esto es un author
+      delete dto.roles;
+      // const { roles, ...rest } = dto;
+      data = await this.userService.addJob(id, dto, user);
+    }
+    return { message: 'job added', data };
+  }
+
+
+  @Auth({
+    possession: 'own',
+    action: 'read',
+    resource: AppResource.USER,
+  })
+  @Get(':id/job')
+  async getOneWithJobs(@Param('id') id: number, @User() user: UserEntity) {
+    const data = await this.userService.getOneWithJobs(id);
+    return { data };
   }
 }

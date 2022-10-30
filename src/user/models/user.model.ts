@@ -1,5 +1,7 @@
 import { PrimaryGeneratedColumn, Column, CreateDateColumn, BeforeInsert, BeforeUpdate, Entity } from 'typeorm';
 import { hash } from 'bcryptjs';
+import { OneToMany } from 'typeorm/decorator/relations/OneToMany';
+import { Job } from './job.model';
 
 @Entity('users')
 export class User {
@@ -26,6 +28,9 @@ export class User {
 
   @CreateDateColumn({ name: 'created_at', type: 'timestamp' })
   createdAt: Date;
+
+  @OneToMany(() => Job, (job) => job.user, { cascade: true })
+  selectedJobs: Job[];
 
   @BeforeInsert()
   @BeforeUpdate()

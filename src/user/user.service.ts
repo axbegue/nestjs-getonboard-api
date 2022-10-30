@@ -1,7 +1,7 @@
 import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
-import { CreateUserDto, EditUserDto } from './dtos';
+import { CreateUserDto, EditUserDto, RegisterJobDto } from './dtos';
 import { User } from './models';
 
 export interface UserFindOne {
@@ -44,7 +44,6 @@ export class UserService {
   }
 
   async editOne(id: number, dto: EditUserDto, userEntity?: User) {
-    console.log(dto);
     const user = await this.getOne(id, userEntity);
     const editedUser = Object.assign(user, dto);
     return await this.userRepository.save(editedUser);
@@ -61,5 +60,29 @@ export class UserService {
       .where(data)
       .addSelect('user.password')
       .getOne();
+  }
+
+  async addJob(id: number, dto: RegisterJobDto, userEntity?: User) {
+    const user = await this.getOne(id, userEntity);
+    const editedUser = Object.assign(user, dto);
+    return await this.userRepository.save(editedUser);
+  }
+
+  async getOneWithJobs(id: number, userEntity?: User) {
+    const user = await this.userRepository
+      .findOne({
+        relations: {
+          selectedJobs: true
+        },
+        where: {
+          id: id
+        }
+      })
+      .then(u => (!userEntity ? u : !!u && userEntity.id === u.id ? u : null));
+
+    if (!user)
+      throw new NotFoundException('User does not exists or unauthorized');
+
+    return user;
   }
 }
