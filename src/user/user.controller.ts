@@ -113,7 +113,7 @@ export class UserController {
       data = await this.userService.addJob(id, dto);
     } else {
       // esto es un author
-      delete dto.roles;
+      // delete dto.roles;
       // const { roles, ...rest } = dto;
       data = await this.userService.addJob(id, dto, user);
     }

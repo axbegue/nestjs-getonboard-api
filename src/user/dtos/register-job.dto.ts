@@ -1,10 +1,18 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsNotEmpty } from 'class-validator';
+import { IsNotEmpty, IsNumber, IsPositive } from 'class-validator';
 import { CreateJobDto } from './create-job.dto';
-import { EditUserDto } from './edit-user.dto';
 
-export class RegisterJobDto extends EditUserDto {
+export class RegisterJobDto  {
+  @IsNumber()
   @IsNotEmpty()
+  @IsPositive()
   @ApiProperty()
+  id: number;
+
+  @IsNotEmpty()
+  @ApiProperty({
+    isArray: true,
+    type: CreateJobDto
+  })
   selectedJobs: CreateJobDto[];
 }
