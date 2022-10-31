@@ -102,10 +102,6 @@ export class UserController {
     @Body() dto: RegisterJobDto,
     @User() user: UserEntity,
   ) {
-    // console.log(id);
-    console.log(dto);
-    // console.log(user);
-    
     let data;
 
     if (this.rolesBuilder.can(user.roles).updateAny(AppResource.USER).granted) {
@@ -118,6 +114,31 @@ export class UserController {
       data = await this.userService.addJob(id, dto, user);
     }
     return { message: 'job added', data };
+  }
+
+  @Auth({
+    possession: 'own',
+    action: 'update',
+    resource: AppResource.USER,
+  })
+  @Put(':id/removejob')
+  async removeJob(
+    @Param('id') id: number,
+    @Body() dto: RegisterJobDto,
+    @User() user: UserEntity,
+  ) {
+    let data;
+
+    if (this.rolesBuilder.can(user.roles).updateAny(AppResource.USER).granted) {
+      // esto es un admin
+      data = await this.userService.removeJob(id, dto);
+    } else {
+      // esto es un author
+      // delete dto.roles;
+      // const { roles, ...rest } = dto;
+      data = await this.userService.removeJob(id, dto, user);
+    }
+    return { message: 'job removed', data };
   }
 
 

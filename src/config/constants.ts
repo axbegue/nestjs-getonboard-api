@@ -1,4 +1,5 @@
 export const SERVER_PORT = 'port';
+export const SERVER_NAME = 'serverName';
 
 export const JWT_SECRET = 'JWT_SECRET';
 

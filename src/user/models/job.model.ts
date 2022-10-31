@@ -8,7 +8,7 @@ export class Job {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @ManyToOne(() => User, (user) => user.selectedJobs)
+  @ManyToOne(() => User, (user) => user.selectedJobs, { nullable: false, orphanedRowAction: 'delete' })
   user: User;
 
   @Column({ type: 'varchar', length: 255, nullable: false })

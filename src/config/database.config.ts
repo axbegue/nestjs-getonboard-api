@@ -4,6 +4,11 @@ import { join } from 'path';
 import { SnakeNamingStrategy } from 'typeorm-naming-strategies';
 
 function typeormModuleOptions(): TypeOrmModuleOptions {
+  let logDb = true;
+  const logDbStr: string = process.env.DATABASE_LOG;
+  if (logDbStr.toLowerCase() === 'false') {
+    logDb = false;
+  }
   return {
     type: 'mysql',
     host: process.env.DATABASE_HOST,
@@ -28,8 +33,8 @@ function typeormModuleOptions(): TypeOrmModuleOptions {
     // },
 
     // Activar SOLO MANUALMENTE en DESARROLLO SI ES NECESARIO (DESACTIVAR EN PRODUCCION).
-    synchronize: true,
-    logging: true,
+    // synchronize: true,
+    logging: logDb,
     logger: 'file',
   };
 }

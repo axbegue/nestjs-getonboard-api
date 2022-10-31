@@ -2,7 +2,7 @@ import { Injectable, NotFoundException, BadRequestException } from '@nestjs/comm
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { CreateUserDto, EditUserDto, RegisterJobDto } from './dtos';
-import { User } from './models';
+import { Job, User } from './models';
 
 export interface UserFindOne {
   id?: number;
@@ -63,9 +63,28 @@ export class UserService {
   }
 
   async addJob(id: number, dto: RegisterJobDto, userEntity?: User) {
-    const user = await this.getOne(id, userEntity);
-    const editedUser = Object.assign(user, dto);
-    return await this.userRepository.save(editedUser);
+    const user = await this.getOneWithJobs(id, userEntity);
+    dto.selectedJobs.forEach(job => {
+      if (!user.selectedJobs.find(exis => exis.jobId === job.jobId)) {
+        user.selectedJobs.push(job as Job);
+      }
+    });
+    // const editedUser = Object.assign(user, dto);
+    await this.userRepository.save(user);
+    return this.getOneWithJobs(id, userEntity);
+  }
+
+  async removeJob(id: number, dto: RegisterJobDto, userEntity?: User) {
+    const user = await this.getOneWithJobs(id, userEntity);
+    dto.selectedJobs.forEach(job => {
+      const index = user.selectedJobs.findIndex(exis => exis.jobId === job.jobId);
+      if (index > -1) {
+        user.selectedJobs.splice(index, 1);
+      }
+    })
+    // const editedUser = Object.assign(user, dto);
+    await this.userRepository.save(user);
+    return this.getOneWithJobs(id, userEntity);
   }
 
   async getOneWithJobs(id: number, userEntity?: User) {
